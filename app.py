@@ -26,7 +26,6 @@ connection = mysql.connector.connect(
     ssl_ca='ca-certificate.crt'
 )
 
-
 def insert_data(cur, reader, table_name):
     failed_rows = []
     for i, row in enumerate(reader):
