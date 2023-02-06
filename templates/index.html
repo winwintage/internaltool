@@ -1,0 +1,178 @@
+<html>
+  <head>
+    <title>Wintage Server</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <script>
+      const uploadCSVFormatMap = {
+        Order_Data: [
+          "Sale_Order_Item_Code",
+          "Display_Order_Code",
+          "Notification_Email",
+          "Notification_Mobile",
+          "Shipping_Address_Name",
+          "Shipping_Address_Line1",
+          "Shipping_Address_Line2",
+          "Shipping_Address_City",
+          "Shipping_Address_State",
+          "Shipping_Address_Country",
+          "Shipping_Address_Pincode",
+          "Order_Date",
+          "Channel_Name",
+          "Item_SKU_Code",
+        ],
+        Sku_Data: [
+          "Item_Sku_Code",
+          "Date_Introduced",
+          "Fabric",
+          "Product_Type",
+          "CP",
+        ],
+        Email_Validation: ["Email_ID", "Email_Type", "Validation_Date"],
+        Order_Status: [
+          "Display_Order_Code",
+          "Pre-Dispatch_Status",
+          "Delivery_Status",
+          "Cancelled_Reason",
+          "Channel_Name",
+        ],
+        Channel_List: ["Channel_Name"],
+        Fabric_Codes: ["Fabric_Code"],
+        Product_Types: ["Product_Type"],
+        SMS_Failed: ["Campaign_Name", "Date", "Notification_Mobile"],
+        SMS_Opened: [
+          "Campaign_Name",
+          "Date",
+          "Notification_Mobile",
+          "browser",
+          "os",
+        ],
+        SMS_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
+        Whatsapp_Failed: ["Campaign_Name", "Date", "Notification_Mobile"],
+        Whatsapp_Opened: ["Campaign_Name", "Date", "Notification_Mobile"],
+        Whatsapp_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
+        Whatsapp: [
+          "Campaign_Name",
+          "Date",
+          "Country_Code",
+          "Notification_Mobile",
+          "Status",
+          "Reply",
+        ],
+        Zero_Order_Customers: [
+          "Name",
+          "Country_Code",
+          "Notification_Mobile",
+          "Notification_Email",
+          "Source",
+          "Exists",
+        ],
+      };
+
+      function getCSVFormat() {
+        const values =
+          uploadCSVFormatMap[document.getElementById("table").value];
+        const csvWrapper = document.getElementById("csvFormat");
+
+        while(csvWrapper.firstChild) {
+          csvWrapper.removeChild(csvWrapper.firstChild);
+        }
+
+        for (var i = 0; i < values.length; i++) {
+          var option = document.createElement("li");
+          option.appendChild(document.createTextNode(values[i]));
+          csvWrapper.appendChild(option);
+        }
+      }
+
+      function generateOptions() {
+        var options = [
+          "Order_Data",
+          "Sku_Data",
+          "Email_Validation",
+          "Order_Status",
+          "Channel_List",
+          "Fabric_Codes",
+          "Product_Types",
+          "SMS_Failed",
+          "SMS_Opened",
+          "SMS_Sent",
+          "Whatsapp_Failed",
+          "Whatsapp_Opened",
+          "Whatsapp_Sent",
+          "Whatsapp",
+          "Zero_Order_Customers",
+        ];
+        var select = document.getElementById("table");
+        var select2 = document.getElementById("table_name");
+
+        for (var i = 0; i < options.length; i++) {
+          var option = document.createElement("option");
+          option.value = options[i];
+          option.text = options[i];
+          select.add(option);
+
+          var option2 = document.createElement("option");
+          option2.value = options[i];
+          option2.text = options[i];
+          select2.add(option2);
+        }
+      }
+
+      function onLoad() {
+        generateOptions();
+        getCSVFormat();
+        document.getElementById("table").addEventListener("change", () => {
+          getCSVFormat()
+        });
+      }
+    </script>
+  </head>
+  <body onload="onLoad()">
+    <div class="main">
+      <div class="company">Wintage Server</div>
+      <div class="wrapper">
+        <form
+          id="form_1"
+          action="/uploadCsv"
+          method="post"
+          enctype="multipart/form-data"
+        >
+          <div class="form_header">Upload Data</div>
+          <div class="input">
+            <label for="table">Select Table:</label>
+            <select required id="table" name="table"></select>
+          </div>
+          <div class="input">
+            <label for="file">CSV File:</label>
+            <input required type="file" name="file" />
+          </div>
+          <input type="submit" value="Upload Data" />
+          <div class="form_post loader">
+            <div>Processing Upload...</div>
+            <img class="loader_img" src="../static/icons/loader.svg" />
+          </div>
+        </form>
+        <form action="/getData" method="post" enctype="multipart/form-data">
+          <div class="form_header">Download Data</div>
+          <div class="input">
+            <label for="table_name">Select Table:</label>
+            <select id="table_name" name="table_name"></select>
+          </div>
+          <input required type="submit" value="Fetch Data" />
+          <div class="form_get loader">
+            <div>Processing Fetch...</div>
+            <img class="loader_img" src="../static/icons/loader.svg" />
+          </div>
+        </form>
+      </div>
+
+      <div class="csv_headers">
+        <div class="form_header">Input CSV headers (Case-Sensitive)</div>
+        <ul id="csvFormat"></ul>
+      </div>
+    </div>
+  </body>
+</html>
