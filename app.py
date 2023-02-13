@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import csv
 from mysql.connector.constants import ClientFlag
-from constants import getQuery, table_list, getSelectQuery
+from constants import getQuery, table_list, getSelectQuery, uploadCSVFormatMap
 import datetime
 import io
 from flask_cors import CORS, cross_origin
@@ -67,11 +67,17 @@ def uploadCsv():
         if table_name not in table_list:
             return jsonify({'error': "Table not present in DB"}), 400
 
+        excepted_csv_headers = uploadCSVFormatMap[table_name]
+
         make_sure_connection_is_present()
         cur = connection.cursor()
 
         file_data = uploaded_file.read().decode("utf-8")
         file_reader = csv.DictReader(file_data.splitlines())
+
+        header = file_reader.fieldnames
+        if sorted(header) != sorted(excepted_csv_headers):
+            return jsonify({'error': "Header in the uploaded CSV does not match the expected CSV headers. Cross check the CSV header values given on previous page and retry"}), 400
 
         failed_rows = insert_data(cur, file_reader, table_name)
 
@@ -142,4 +148,4 @@ def getData():
 
 # Driver function
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
