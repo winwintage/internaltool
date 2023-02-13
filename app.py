@@ -30,6 +30,7 @@ def make_sure_connection_is_present():
     try:
         cursor = connection.cursor()
         cursor.execute("SELECT 1")
+        cursor.fetchone()
     except mysql.connector.errors.OperationalError as e:
         # The connection has been closed or has timed out, so we need to reconnect
         print("Connection is not present, trying to reconnect with error:", e.msg)
