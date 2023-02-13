@@ -26,6 +26,15 @@ connection = mysql.connector.connect(
     ssl_ca='ca-certificate.crt'
 )
 
+def make_sure_connection_is_present():
+    try:
+        cursor = connection.cursor()
+        cursor.execute("SELECT 1")
+    except mysql.connector.errors.OperationalError as e:
+        # The connection has been closed or has timed out, so we need to reconnect
+        print("Connection is not present, trying to reconnect with error:", e.msg)
+        connection.reconnect()
+
 def insert_data(cur, reader, table_name):
     failed_rows = []
     for i, row in enumerate(reader):
@@ -57,6 +66,7 @@ def uploadCsv():
         if table_name not in table_list:
             return jsonify({'error': "Table not present in DB"}), 400
 
+        make_sure_connection_is_present()
         cur = connection.cursor()
 
         file_data = uploaded_file.read().decode("utf-8")
@@ -100,6 +110,8 @@ def getData():
     filename = "{}.csv".format(table_name)
     try:
         query = getSelectQuery(table_name)
+
+        make_sure_connection_is_present()
         cur = connection.cursor()
         cur.execute(query)
         data = cur.fetchall()
