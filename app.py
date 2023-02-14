@@ -26,6 +26,7 @@ connection = mysql.connector.connect(
     ssl_ca='ca-certificate.crt'
 )
 
+
 def make_sure_connection_is_present():
     try:
         cursor = connection.cursor()
@@ -36,15 +37,17 @@ def make_sure_connection_is_present():
         print("Connection is not present, trying to reconnect with error:", e.msg)
         connection.reconnect()
 
+
 def insert_data(cur, reader, table_name):
-    failed_rows = []
+    rows = []
     for i, row in enumerate(reader):
         try:
             query = getQuery(table_name, row)
             cur.execute(query)
+            rows.append((i+1, row, "SUCCESS", ""))
         except Exception as e:
-            failed_rows.append((i, row, str(e)))
-    return failed_rows
+            rows.append((i+1, row, "FAILED", str(e)))
+    return rows
 
 
 @app.route('/', methods=['GET'])
@@ -87,14 +90,17 @@ def uploadCsv():
         writer = csv.writer(stringIO)
 
         if failed_rows:
-            failed_csv_name = "{}_failed_rows_{}.csv".format(table_name, datetime.datetime.now())
-            
-            writer.writerow(["Row Number", "Error", "Data"])
-            for i, row, error in failed_rows:
-                writer.writerow([i, error, row])
+            failed_csv_name = "{}_failed_rows_{}.csv".format(
+                table_name, datetime.datetime.now())
+
+            writer.writerow(["Row Number", "Row Status",
+                            "Error Message", *header])
+            for i, row, rowStatus, error in failed_rows:
+                writer.writerow([i, rowStatus, error, *list(row.values())])
 
             output = make_response(stringIO.getvalue())
-            output.headers["Content-Disposition"] = "attachment; filename={}".format(failed_csv_name)
+            output.headers["Content-Disposition"] = "attachment; filename={}".format(
+                failed_csv_name)
             output.headers["Content-type"] = "text/csv"
             return output
         else:
@@ -125,7 +131,7 @@ def getData():
 
         # Get the column names
         headers = [i[0] for i in cur.description]
-        
+
         # Save the data with headers to a CSV file
         with open(filename, 'w', newline='') as file:
             writer = csv.writer(file)
@@ -133,7 +139,7 @@ def getData():
             writer.writerows(data)
 
         cur.close()
-        
+
         # Return the CSV file as a download
         return send_file(filename,
                          mimetype='text/csv',
