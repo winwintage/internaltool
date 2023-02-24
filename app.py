@@ -80,7 +80,7 @@ def uploadCsv():
 
         header = file_reader.fieldnames
         if sorted(header) != sorted(excepted_csv_headers):
-            return jsonify({'error': "Header in the uploaded CSV does not match the expected CSV headers. Cross check the CSV header values given on previous page and retry"}), 400
+            return jsonify({'error': "Header in the uploaded CSV does not match the expected CSV headers. Cross check the CSV header values given on previous page and retry Provided Values: {}, Expected Headers: {}".format(header, excepted_csv_headers)}), 400
 
         failed_rows = insert_data(cur, file_reader, table_name)
 
