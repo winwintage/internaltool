@@ -153,7 +153,7 @@ def getQuery(table_name, values):
     elif table_name == order_status_table:
         return """
                 INSERT INTO %s 
-                (Display_Order_Code, `Pre-Dispatch_Status`, Delivery_Status, Cancelled_Reason, Channel_Name)
+                (Display_Order_Code, `Pre-Dispatch_Status`, Delivery_Status, Cancelled_Reason, Channel_Id)
                 VALUES (%s, %s, %s, %s, (SELECT id from Channel_List WHERE Channel_Name = %s));
         """ % (
             table_name,
