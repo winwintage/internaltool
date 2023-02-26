@@ -85,7 +85,7 @@ uploadCSVFormatMap = {
         "Notification_Mobile",
         "Notification_Email",
         "Source",
-        "Exists",
+        "Channel_Name",
     ],
 }
 
@@ -233,8 +233,8 @@ def getQuery(table_name, values):
     elif table_name == zero_order_customers:
         return """
                 INSERT INTO %s 
-                (Name, Country_Code, Notification_Mobile, Notification_Email, Source, `Exists`)
-                VALUES (%s, %s, %s, %s, %s, %s);
+                (Name, Country_Code, Notification_Mobile, Notification_Email, Source, Channel_Id)
+                VALUES (%s, %s, %s, %s, %s, (SELECT id from Channel_List WHERE Channel_Name = %s));
         """ % (
             table_name,
             sanitizeData(values['Name']),
@@ -242,7 +242,7 @@ def getQuery(table_name, values):
             sanitizeData(values['Notification_Mobile']),
             sanitizeData(values['Notification_Email']),
             sanitizeData(values['Source']),
-            sanitizeData(values['Exists']),
+            sanitizeData(values['Channel_Name']),
         )
 
 
@@ -282,6 +282,12 @@ def getSelectQuery(table_name):
             where fab.id = sku.Product_Type_Id) as 'Product_Type_Id',
                 sku.CP
             FROM Sku_Data sku;
+        """
+    elif table_name ==  zero_order_customers:
+        return """
+            SELECT zoc.id, zoc.Name, zoc.Country_Code, zoc.Notification_Mobile, zoc.Notification_Email, zoc.Source, zoc.`Exists`,
+            (SELECT Channel_Name from Channel_List cl WHERE cl.id = zoc.Channel_Id) as Channel_Name
+            from Zero_Order_Customers zoc;
         """
     else:
         return "SELECT * FROM {}".format(table_name)
