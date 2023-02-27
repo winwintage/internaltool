@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import os
 import csv
 from mysql.connector.constants import ClientFlag
-from constants import getQuery, table_list, getSelectQuery, uploadCSVFormatMap
+from constants import getQuery, table_list, getSelectQuery, uploadCSVFormatMap, sanitizeData
 import datetime
 import io
 from flask_cors import CORS, cross_origin
@@ -50,6 +50,26 @@ def insert_data(cur, reader, table_name):
     return rows
 
 
+def insert_or_update(cur, reader, table_name):
+    rows = []
+    for i, row in enumerate(reader):
+        try:
+            fetch_query = 'SELECT id FROM %s WHERE Notification_Mobile=%s AND Country_Code=%s AND Channel_Id=(SELECT id from Channel_List WHERE Channel_Name = %s);'%(table_name, sanitizeData(row['Notification_Mobile']), sanitizeData(row['Country_Code']), sanitizeData(row['Channel_Name']))
+            cur.execute(fetch_query)
+            row_data = cur.fetchone()
+            if row_data:
+                (row_id,) = row_data
+                update_query = 'UPDATE %s SET Name=%s, Notification_Email=%s, Source=%s, `Date`=%s WHERE id=%s;'%(table_name, sanitizeData(row['Name']), sanitizeData(row['Notification_Email']), sanitizeData(row['Source']), sanitizeData(row['Date']), row_id)
+                cur.execute(update_query)
+            else:
+                query = getQuery(table_name, row)
+                cur.execute(query)
+            rows.append((i+1, row, "SUCCESS", ""))
+        except Exception as e:
+            rows.append((i+1, row, "FAILED", str(e)))
+    return rows
+
+
 @app.route('/', methods=['GET'])
 @cross_origin()
 def home():
@@ -82,7 +102,10 @@ def uploadCsv():
         if sorted(header) != sorted(excepted_csv_headers):
             return jsonify({'error': "Header in the uploaded CSV does not match the expected CSV headers. Cross check the CSV header values given on previous page and retry Provided Values: {}, Expected Headers: {}".format(header, excepted_csv_headers)}), 400
 
-        failed_rows = insert_data(cur, file_reader, table_name)
+        if table_name == 'Zero_Order_Customers':
+            failed_rows = insert_or_update(cur, file_reader, table_name)
+        else:
+            failed_rows = insert_data(cur, file_reader, table_name)
 
         connection.commit()
         cur.close()
