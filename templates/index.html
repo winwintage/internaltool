@@ -30,6 +30,13 @@
           "Product_Type",
           "CP",
         ],
+        "Update Sku_Data": [
+          "Item_Sku_Code",
+          "Date_Introduced",
+          "Fabric",
+          "Product_Type",
+          "CP",
+        ],
         Email_Validation: ["Email_ID", "Email_Type", "Validation_Date"],
         Order_Status: [
           "Display_Order_Code",
@@ -50,9 +57,9 @@
           "os",
         ],
         SMS_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
-        Whatsapp_Failed: ["Campaign_Name", "Date", "Notification_Mobile"],
-        Whatsapp_Opened: ["Campaign_Name", "Date", "Notification_Mobile"],
-        Whatsapp_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
+        // Whatsapp_Failed: ["Campaign_Name", "Date", "Notification_Mobile"],
+        // Whatsapp_Opened: ["Campaign_Name", "Date", "Notification_Mobile"],
+        // Whatsapp_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
         Whatsapp: [
           "Campaign_Name",
           "Date",
@@ -77,7 +84,7 @@
           uploadCSVFormatMap[document.getElementById("table").value];
         const csvWrapper = document.getElementById("csvFormat");
 
-        while(csvWrapper.firstChild) {
+        while (csvWrapper.firstChild) {
           csvWrapper.removeChild(csvWrapper.firstChild);
         }
 
@@ -100,11 +107,12 @@
           "SMS_Failed",
           "SMS_Opened",
           "SMS_Sent",
-          "Whatsapp_Failed",
-          "Whatsapp_Opened",
-          "Whatsapp_Sent",
+          // "Whatsapp_Failed",
+          // "Whatsapp_Opened",
+          // "Whatsapp_Sent",
           "Whatsapp",
           "Zero_Order_Customers",
+          "Update Sku_Data",
         ];
         var select = document.getElementById("table");
         var select2 = document.getElementById("table_name");
@@ -115,10 +123,12 @@
           option.text = options[i];
           select.add(option);
 
-          var option2 = document.createElement("option");
-          option2.value = options[i];
-          option2.text = options[i];
-          select2.add(option2);
+          if (options[i] != "Update Sku_Data") {
+            var option2 = document.createElement("option");
+            option2.value = options[i];
+            option2.text = options[i];
+            select2.add(option2);
+          }
         }
       }
 
@@ -126,7 +136,7 @@
         generateOptions();
         getCSVFormat();
         document.getElementById("table").addEventListener("change", () => {
-          getCSVFormat()
+          getCSVFormat();
         });
       }
     </script>

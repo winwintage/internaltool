@@ -18,11 +18,13 @@ whatsapp_opened_table = 'Whatsapp_Opened'
 whatsapp_sent_table = 'Whatsapp_Sent'
 whatsapp = 'Whatsapp'
 
+update_sku_data = 'Update Sku_Data'
+
 zero_order_customers = 'Zero_Order_Customers'
 
 table_list = ['Order_Data', 'Sku_Data', 'Email_Validation', 'Order_Status',
               'Channel_List', 'Fabric_Codes', 'Product_Types', 'SMS_Failed', 'SMS_Opened',
-              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp', 'Zero_Order_Customers']
+              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp', 'Zero_Order_Customers', 'Update Sku_Data']
 
 uploadCSVFormatMap = {
     "Order_Data": [
@@ -42,6 +44,13 @@ uploadCSVFormatMap = {
         "Item_SKU_Code",
     ],
     "Sku_Data": [
+        "Item_Sku_Code",
+        "Date_Introduced",
+        "Fabric",
+        "Product_Type",
+        "CP",
+    ],
+    "Update Sku_Data": [
         "Item_Sku_Code",
         "Date_Introduced",
         "Fabric",
@@ -89,6 +98,7 @@ uploadCSVFormatMap = {
         "Channel_Name",
     ],
 }
+
 
 def sanitizeData(value):
     if value in ('', None):
@@ -246,6 +256,21 @@ def getQuery(table_name, values):
             sanitizeData(values['Date']),
             sanitizeData(values['Channel_Name']),
         )
+    elif table_name == update_sku_data:
+        return """
+                UPDATE Sku_Data
+                SET Date_Introduced = %s,
+                Fabric_Id = (SELECT id from Fabric_Codes WHERE Fabric_Code = %s),
+                Product_Type_Id = (SELECT id from Product_Types WHERE Product_Type = %s),
+                CP = %s
+                WHERE Item_Sku_Code = %s;
+        """ % (
+            sanitizeData(values['Date_Introduced']),
+            sanitizeData(values['Fabric']),
+            sanitizeData(values['Product_Type']),
+            sanitizeData(values['CP']),
+            sanitizeData(values['Item_Sku_Code']),
+        )
 
 
 def getSelectQuery(table_name):
@@ -285,7 +310,7 @@ def getSelectQuery(table_name):
                 sku.CP
             FROM Sku_Data sku;
         """
-    elif table_name ==  zero_order_customers:
+    elif table_name == zero_order_customers:
         return """
             SELECT zoc.id, zoc.Name, zoc.Country_Code, zoc.Notification_Mobile, zoc.Notification_Email, zoc.Source, zoc.`Date`, zoc.Last_Order_Date,
             (SELECT Channel_Name from Channel_List cl WHERE cl.id = zoc.Channel_Id) as Channel_Name
