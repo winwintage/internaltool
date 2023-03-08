@@ -19,12 +19,13 @@ whatsapp_sent_table = 'Whatsapp_Sent'
 whatsapp = 'Whatsapp'
 
 update_sku_data = 'Update Sku_Data'
+update_order_data = 'Update Order_Data'
 
 zero_order_customers = 'Zero_Order_Customers'
 
 table_list = ['Order_Data', 'Sku_Data', 'Email_Validation', 'Order_Status',
               'Channel_List', 'Fabric_Codes', 'Product_Types', 'SMS_Failed', 'SMS_Opened',
-              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp', 'Zero_Order_Customers', 'Update Sku_Data']
+              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp', 'Zero_Order_Customers', 'Update Sku_Data', 'Update Order_Data']
 
 uploadCSVFormatMap = {
     "Order_Data": [
@@ -41,6 +42,22 @@ uploadCSVFormatMap = {
         "Shipping_Address_Pincode",
         "Order_Date",
         "Channel_Name",
+        "Item_SKU_Code",
+    ],
+    'Update Order_Data': [
+        "Sale_Order_Item_Code",
+        "Display_Order_Code",
+        "Channel_Name",
+        "Notification_Email",
+        "Notification_Mobile",
+        "Shipping_Address_Name",
+        "Shipping_Address_Line1",
+        "Shipping_Address_Line2",
+        "Shipping_Address_City",
+        "Shipping_Address_State",
+        "Shipping_Address_Country",
+        "Shipping_Address_Pincode",
+        "Order_Date",
         "Item_SKU_Code",
     ],
     "Sku_Data": [
@@ -271,6 +288,37 @@ def getQuery(table_name, values):
             sanitizeData(values['CP']),
             sanitizeData(values['Item_Sku_Code']),
         )
+    elif table_name == update_order_data:
+         return """
+                UPDATE Order_Data
+                SET Notifcation_Email = %s,
+                Notification_Mobile = %s,
+                Shipping_Address_Name = %s,
+                Shipping_Address_Line1 = %s,
+                Shipping_Address_Line2 = %s,
+                Shipping_Address_City = %s,
+                Shipping_Address_State = %s,
+                Shipping_Address_Country = %s,
+                Shipping_Address_Pincode = %s,
+                Order_Date = %s,
+                Item_SKU_Id = (SELECT id from Sku_Data WHERE Item_Sku_Code = %s)
+                WHERE Sale_Order_Item_Code = %s AND Display_Order_Code = %s AND Channel_Id = (SELECT id from Channel_List WHERE Channel_Name = %s);
+        """ % (
+            sanitizeData(values['Notification_Email']),
+            sanitizeData(values['Notification_Mobile']),
+            sanitizeData(values['Shipping_Address_Name']),
+            sanitizeData(values['Shipping_Address_Line1']),
+            sanitizeData(values['Shipping_Address_Line2']),
+            sanitizeData(values['Shipping_Address_City']),
+            sanitizeData(values['Shipping_Address_State']),
+            sanitizeData(values['Shipping_Address_Country']),
+            sanitizeData(values['Shipping_Address_Pincode']),
+            sanitizeData(values['Order_Date']),
+            sanitizeData(values['Item_SKU_Code']),
+            sanitizeData(values['Sale_Order_Item_Code']),
+            sanitizeData(values['Display_Order_Code']),
+            sanitizeData(values['Channel_Name'])
+        ) 
 
 
 def getSelectQuery(table_name):
