@@ -8,6 +8,7 @@ from constants import getQuery, table_list, getSelectQuery, uploadCSVFormatMap, 
 import datetime
 import io
 from flask_cors import CORS, cross_origin
+import chardet
 
 load_dotenv()
 
@@ -42,6 +43,7 @@ def insert_data(cur, reader, table_name):
     rows = []
     for i, row in enumerate(reader):
         try:
+            print('Executing row {}'.format(i))
             query = getQuery(table_name, row)
             cur.execute(query)
             rows.append((i+1, row, "SUCCESS", ""))
@@ -99,7 +101,15 @@ def uploadCsv():
         make_sure_connection_is_present()
         cur = connection.cursor()
 
-        file_data = uploaded_file.read().decode("utf-8")
+        # detect the encoding of the file
+        file_data = uploaded_file.read()
+        result = chardet.detect(file_data)
+        encoding = result['encoding']
+
+        # read the file using the detected encoding
+        file_data = file_data.decode(encoding)
+
+        # file_data = uploaded_file.read().decode("utf-8")
         file_reader = csv.DictReader(file_data.splitlines())
 
         header = file_reader.fieldnames
@@ -203,4 +213,4 @@ def getSqlData():
 
 # Driver function
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run() # app.run(debug=True)

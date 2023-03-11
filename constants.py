@@ -240,23 +240,21 @@ def getQuery(table_name, values):
                 VALUES (%s);
         """ % (
             table_name,
-            sanitizeData(values['Fabric_Codes']),
+            sanitizeData(values['Fabric_Code']),
         )
     elif table_name == whatsapp:
         return """
                 INSERT INTO %s 
                 (Campaign_Name, `Date`, Country_Code, Notification_Mobile, Status, Reply)
-                VALUES (%s);
+                VALUES (%s, %s, %s, %s, %s, %s);
         """ % (
             table_name,
-            sanitizeData(
-                sanitizeData(values['Campaign_Name']),
-                sanitizeData(values['Date']),
-                sanitizeData(values['Country_Code']),
-                sanitizeData(values['Notification_Mobile']),
-                sanitizeData(values['Status']),
-                sanitizeData(values['Reply']),
-            ),
+            sanitizeData(values['Campaign_Name']),
+            sanitizeData(values['Date']),
+            sanitizeData(values['Country_Code']),
+            sanitizeData(values['Notification_Mobile']),
+            sanitizeData(values['Status']),
+            sanitizeData(values['Reply']),
         )
     elif table_name == zero_order_customers:
         return """
@@ -289,7 +287,7 @@ def getQuery(table_name, values):
             sanitizeData(values['Item_Sku_Code']),
         )
     elif table_name == update_order_data:
-         return """
+        return """
                 UPDATE Order_Data
                 SET Notifcation_Email = %s,
                 Notification_Mobile = %s,
@@ -318,7 +316,7 @@ def getQuery(table_name, values):
             sanitizeData(values['Sale_Order_Item_Code']),
             sanitizeData(values['Display_Order_Code']),
             sanitizeData(values['Channel_Name'])
-        ) 
+        )
 
 
 def getSelectQuery(table_name):
