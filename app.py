@@ -75,6 +75,10 @@ def insert_or_update(cur, reader, table_name):
 def home():
     return render_template('index.html')
 
+@app.route('/sql', methods=['GET'])
+@cross_origin()
+def sql():
+    return render_template('sql.html')
 
 # Upload CSV route
 @app.route('/uploadCsv', methods=['POST'])
@@ -132,21 +136,8 @@ def uploadCsv():
         return jsonify({'error': 'Failed to process. Reason: {}'.format(str(e))}), 500
 
 
-@app.route('/getData', methods=['POST'])
-@cross_origin()
-def getData():
-    if not request.form['table_name']:
-        return jsonify({'error': "Table name is mandatory"}), 400
-
-    table_name = request.form['table_name']
-
-    if table_name not in table_list:
-        return jsonify({'error': "Table not present in DB"}), 400
-
-    filename = "{}.csv".format(table_name)
+def getDataAndProvideCSV(filename, query):
     try:
-        query = getSelectQuery(table_name)
-
         make_sure_connection_is_present()
         cur = connection.cursor()
         cur.execute(query)
@@ -173,6 +164,41 @@ def getData():
         # Clean up the file after the request is processed
         if os.path.exists(filename):
             os.remove(filename)
+
+
+@app.route('/getData', methods=['POST'])
+@cross_origin()
+def getData():
+    if not request.form['table_name']:
+        return jsonify({'error': "Table name is mandatory"}), 400
+
+    table_name = request.form['table_name']
+
+    if table_name not in table_list:
+        return jsonify({'error': "Table not present in DB"}), 400
+
+    filename = "{}.csv".format(table_name)
+    query = getSelectQuery(table_name)
+    
+    return getDataAndProvideCSV(filename=filename, query=query)
+
+
+@app.route('/getSqlData', methods=['POST'])
+@cross_origin()
+def getSqlData():
+    if not request.form.get('authentication_key', None):
+        return jsonify({'error': "Authentication key is mandatory for security"}), 400
+    
+    if request.form['authentication_key'] != os.getenv("DB_PASSWORD"):
+        return jsonify({'error': "Given authentication key is not correct"}), 400
+
+    if not request.form.get('sql_query', None):
+        return jsonify({'error': "SQL Query is a required field"}), 400
+
+    filename = "Sql_Dump_{}.csv".format(datetime.datetime.now())
+    query = request.form['sql_query']
+    
+    return getDataAndProvideCSV(filename=filename, query=query)
 
 
 # Driver function

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Run SQL</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <div class="company">Wintage Server</div>
+      <div class="wrapper">
+        <form
+          action="/getSqlData"
+          method="post"
+          enctype="multipart/form-data"
+          id="sql_form"
+        >
+          <div class="form_header">Run SQL Query</div>
+          <div class="input">
+            <label for="table">Authentication Key</label>
+            <input required type="password" id="authentication_key" name="authentication_key"></input>
+          </div>
+          <div class="input">
+            <label for="table">SQL Query</label>
+            <textarea required id="sql_query" name="sql_query"></textarea>
+          </div>
+          <input required type="submit" value="Fetch Data" />
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

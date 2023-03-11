@@ -65,7 +65,10 @@ input[type=submit]:disabled {
     cursor: auto;
 }
 
-
+input[type=text],
+input[type=password] {
+    min-height: 30px;
+}
 
 select {
     background-color: transparent;
@@ -115,4 +118,9 @@ select {
     border-radius: 8px;
     min-width: 280px;
     align-self: stretch;
+}
+
+textarea {
+    min-height: 200px;
+    min-width: 400px;
 }
