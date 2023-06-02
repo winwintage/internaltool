@@ -22,10 +22,13 @@
           "Order_Date",
           "Channel_Name",
           "Item_SKU_Code",
+          "Channel_Product_ID",
+          "Selling_Price",
         ],
         "Update Order_Data": [
           "Sale_Order_Item_Code",
           "Display_Order_Code",
+          "Channel_Name",
           "Notification_Email",
           "Notification_Mobile",
           "Shipping_Address_Name",
@@ -36,8 +39,9 @@
           "Shipping_Address_Country",
           "Shipping_Address_Pincode",
           "Order_Date",
-          "Channel_Name",
           "Item_SKU_Code",
+          "Channel_Product_ID",
+          "Selling_Price",
         ],
         "Backfill Product_ID_Selling_Price": [
           "Channel_Product_ID",
@@ -46,7 +50,7 @@
           "Display_Order_Code",
           "Channel_Name",
         ],
-        "Returns": [
+        Returns: [
           "Display_Order_Code",
           "Channel_Name",
           "Sale_Order_Item_Code",
@@ -149,7 +153,11 @@
           option.text = options[i];
           select.add(option);
 
-          if (options[i] != "Update Sku_Data" && options[i] != "Update Order_Data" && options[i] != "Backfill Product_ID_Selling_Price") {
+          if (
+            options[i] != "Update Sku_Data" &&
+            options[i] != "Update Order_Data" &&
+            options[i] != "Backfill Product_ID_Selling_Price"
+          ) {
             var option2 = document.createElement("option");
             option2.value = options[i];
             option2.text = options[i];

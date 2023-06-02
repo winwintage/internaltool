@@ -49,6 +49,8 @@ uploadCSVFormatMap = {
         "Order_Date",
         "Channel_Name",
         "Item_SKU_Code",
+        "Channel_Product_ID",
+        "Selling_Price",
     ],
     'Update Order_Data': [
         "Sale_Order_Item_Code",
@@ -65,6 +67,8 @@ uploadCSVFormatMap = {
         "Shipping_Address_Pincode",
         "Order_Date",
         "Item_SKU_Code",
+        "Channel_Product_ID",
+        "Selling_Price",
     ],
     "Backfill Product_ID_Selling_Price": [
         "Channel_Product_ID",
@@ -148,7 +152,8 @@ def getQuery(table_name, values):
     if table_name == order_data_table:
         return """
                 INSERT INTO %s
-                (Sale_Order_Item_Code, Display_Order_Code, 
+                (Channel_Product_ID,Selling_Price,
+                Sale_Order_Item_Code, Display_Order_Code, 
                 Notifcation_Email, Notification_Mobile, 
                 Shipping_Address_Name, Shipping_Address_Line1, 
                 Shipping_Address_Line2, Shipping_Address_City, 
@@ -158,6 +163,9 @@ def getQuery(table_name, values):
                 VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,(SELECT id from Channel_List WHERE Channel_Name = %s),(SELECT id from Sku_Data WHERE Item_Sku_Code = %s));
         """ % (
             table_name,
+            sanitizeData(values['Channel_Product_ID']),
+            float(values['Selling_Price']
+                  ) if values['Selling_Price'] else "NULL",
             sanitizeData(values['Sale_Order_Item_Code']),
             sanitizeData(values['Display_Order_Code']),
             sanitizeData(values['Notification_Email']),
@@ -308,7 +316,10 @@ def getQuery(table_name, values):
     elif table_name == update_order_data:
         return """
                 UPDATE Order_Data
-                SET Notifcation_Email = %s,
+                SET 
+                Channel_Product_ID = %s,
+                Selling_Price = %s,
+                Notifcation_Email = %s,
                 Notification_Mobile = %s,
                 Shipping_Address_Name = %s,
                 Shipping_Address_Line1 = %s,
@@ -321,6 +332,9 @@ def getQuery(table_name, values):
                 Item_SKU_Id = (SELECT id from Sku_Data WHERE Item_Sku_Code = %s)
                 WHERE Sale_Order_Item_Code = %s AND Display_Order_Code = %s AND Channel_Id = (SELECT id from Channel_List WHERE Channel_Name = %s);
         """ % (
+            sanitizeData(values['Channel_Product_ID']),
+            float(values['Selling_Price']
+                  ) if values['Selling_Price'] else "NULL",
             sanitizeData(values['Notification_Email']),
             sanitizeData(values['Notification_Mobile']),
             sanitizeData(values['Shipping_Address_Name']),
