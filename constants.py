@@ -23,9 +23,15 @@ update_order_data = 'Update Order_Data'
 
 zero_order_customers = 'Zero_Order_Customers'
 
+returns_table = 'Returns'
+
+backfill_product_id_selling_price = 'Backfill Product_ID_Selling_Price'
+
 table_list = ['Order_Data', 'Sku_Data', 'Email_Validation', 'Order_Status',
               'Channel_List', 'Fabric_Codes', 'Product_Types', 'SMS_Failed', 'SMS_Opened',
-              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp', 'Zero_Order_Customers', 'Update Sku_Data', 'Update Order_Data']
+              'SMS_Sent', 'Whatsapp_Failed', 'Whatsapp_Opened', 'Whatsapp_Sent', 'Whatsapp',
+              'Zero_Order_Customers', 'Returns', 'Update Sku_Data', 'Update Order_Data',
+              'Backfill Product_ID_Selling_Price']
 
 uploadCSVFormatMap = {
     "Order_Data": [
@@ -59,6 +65,13 @@ uploadCSVFormatMap = {
         "Shipping_Address_Pincode",
         "Order_Date",
         "Item_SKU_Code",
+    ],
+    "Backfill Product_ID_Selling_Price": [
+        "Channel_Product_ID",
+        "Selling_Price",
+        "Sale_Order_Item_Code",
+        "Display_Order_Code",
+        "Channel_Name",
     ],
     "Sku_Data": [
         "Item_Sku_Code",
@@ -114,6 +127,12 @@ uploadCSVFormatMap = {
         "Date",
         "Channel_Name",
     ],
+    "Returns": [
+        "Display_Order_Code",
+        "Channel_Name",
+        "Sale_Order_Item_Code",
+        "Channel_Product_Id"
+    ]
 }
 
 
@@ -317,12 +336,38 @@ def getQuery(table_name, values):
             sanitizeData(values['Display_Order_Code']),
             sanitizeData(values['Channel_Name'])
         )
+    elif table_name == backfill_product_id_selling_price:
+        return """
+            UPDATE Order_Data 
+            SET Channel_Product_ID = %s,
+            Selling_Price = %s 
+            WHERE Sale_Order_Item_Code = %s AND Display_Order_Code = %s AND Channel_Id = (SELECT id FROM Channel_List cl WHERE cl.Channel_Name = %s)
+        """ % (
+            sanitizeData(values['Channel_Product_ID']),
+            float(values['Selling_Price']
+                  ) if values['Selling_Price'] else "NULL",
+            sanitizeData(values['Sale_Order_Item_Code']),
+            sanitizeData(values['Display_Order_Code']),
+            sanitizeData(values['Channel_Name'])
+        )
+    elif table_name == returns_table:
+        return """
+            INSERT INTO `Returns`
+            (Display_Order_Code, Channel_Id, Sale_Order_Item_Code, Channel_Product_Id)
+            VALUES
+            (%s, (SELECT id FROM Channel_List cl WHERE cl.Channel_Name = %s), %s, %s);
+        """ % (
+            sanitizeData(values['Display_Order_Code']),
+            sanitizeData(values['Channel_Name']),
+            sanitizeData(values['Sale_Order_Item_Code']),
+            sanitizeData(values['Channel_Product_Id']),
+        )
 
 
 def getSelectQuery(table_name):
     if table_name == order_data_table:
         return """
-                SELECT od.id, 
+            SELECT od.id, 
             od.Sale_Order_Item_Code,
             od.Display_Order_Code, 
             (Select sd.Item_Sku_Code from Sku_Data sd where sd.id = od.Item_SKU_Id) as 'Item_SKU_Code',
@@ -336,7 +381,9 @@ def getSelectQuery(table_name):
             od.Shipping_Address_City, 
             od.Shipping_Address_State,
             od.Shipping_Address_Country, 
-            od.Shipping_Address_Pincode
+            od.Shipping_Address_Pincode,
+            od.Channel_Product_ID,
+            od.Selling_Price
             FROM Order_Data od;
             """
     elif table_name == order_status_table:
@@ -361,6 +408,13 @@ def getSelectQuery(table_name):
             SELECT zoc.id, zoc.Name, zoc.Country_Code, zoc.Notification_Mobile, zoc.Notification_Email, zoc.Source, zoc.`Date`, zoc.Last_Order_Date,
             (SELECT Channel_Name from Channel_List cl WHERE cl.id = zoc.Channel_Id) as Channel_Name
             from Zero_Order_Customers zoc;
+        """
+    elif table_name == returns_table:
+        return """
+            SELECT rs.id, rs.Display_Order_Code, rs.Sale_Order_Item_Code, rs.Channel_Product_Id, cl.Channel_Name
+            FROM `Returns` rs
+            JOIN Channel_List cl 
+            on cl.id = rs.Channel_Id;
         """
     else:
         return "SELECT * FROM {}".format(table_name)

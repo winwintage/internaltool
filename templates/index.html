@@ -39,6 +39,19 @@
           "Channel_Name",
           "Item_SKU_Code",
         ],
+        "Backfill Product_ID_Selling_Price": [
+          "Channel_Product_ID",
+          "Selling_Price",
+          "Sale_Order_Item_Code",
+          "Display_Order_Code",
+          "Channel_Name",
+        ],
+        "Returns": [
+          "Display_Order_Code",
+          "Channel_Name",
+          "Sale_Order_Item_Code",
+          "Channel_Product_Id",
+        ],
         Sku_Data: [
           "Item_Sku_Code",
           "Date_Introduced",
@@ -73,9 +86,6 @@
           "os",
         ],
         SMS_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
-        // Whatsapp_Failed: ["Campaign_Name", "Date", "Notification_Mobile"],
-        // Whatsapp_Opened: ["Campaign_Name", "Date", "Notification_Mobile"],
-        // Whatsapp_Sent: ["Campaign_Name", "Date", "Notification_Mobile"],
         Whatsapp: [
           "Campaign_Name",
           "Date",
@@ -123,13 +133,12 @@
           "SMS_Failed",
           "SMS_Opened",
           "SMS_Sent",
-          // "Whatsapp_Failed",
-          // "Whatsapp_Opened",
-          // "Whatsapp_Sent",
           "Whatsapp",
           "Zero_Order_Customers",
+          "Returns",
           "Update Sku_Data",
           "Update Order_Data",
+          "Backfill Product_ID_Selling_Price",
         ];
         var select = document.getElementById("table");
         var select2 = document.getElementById("table_name");
@@ -140,7 +149,7 @@
           option.text = options[i];
           select.add(option);
 
-          if (options[i] != "Update Sku_Data") {
+          if (options[i] != "Update Sku_Data" && options[i] != "Update Order_Data" && options[i] != "Backfill Product_ID_Selling_Price") {
             var option2 = document.createElement("option");
             option2.value = options[i];
             option2.text = options[i];
