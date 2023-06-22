@@ -151,21 +151,16 @@ def sanitizeData(value):
 def getQuery(table_name, values):
     if table_name == order_data_table:
         return """
-                INSERT INTO %s
-                (Channel_Product_ID,Selling_Price,
-                Sale_Order_Item_Code, Display_Order_Code, 
-                Notifcation_Email, Notification_Mobile, 
-                Shipping_Address_Name, Shipping_Address_Line1, 
-                Shipping_Address_Line2, Shipping_Address_City, 
-                Shipping_Address_State, Shipping_Address_Country, 
-                Shipping_Address_Pincode, Order_Date, 
-                Channel_Id, Item_SKU_Id)
-                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,(SELECT id from Channel_List WHERE Channel_Name = %s),(SELECT id from Sku_Data WHERE Item_Sku_Code = %s));
+            INSERT INTO %s
+            (Channel_Product_ID, Selling_Price, Sale_Order_Item_Code, Display_Order_Code, 
+            Notifcation_Email, Notification_Mobile, Shipping_Address_Name, Shipping_Address_Line1, 
+            Shipping_Address_Line2, Shipping_Address_City, Shipping_Address_State, Shipping_Address_Country, 
+            Shipping_Address_Pincode, Order_Date, Channel_Id, Item_SKU_Id)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, (SELECT id from Channel_List WHERE Channel_Name = %s), (SELECT id from Sku_Data WHERE Item_Sku_Code = %s));
         """ % (
             table_name,
             sanitizeData(values['Channel_Product_ID']),
-            float(values['Selling_Price']
-                  ) if values['Selling_Price'] else "NULL",
+            float(values['Selling_Price']) if values['Selling_Price'] else "NULL",
             sanitizeData(values['Sale_Order_Item_Code']),
             sanitizeData(values['Display_Order_Code']),
             sanitizeData(values['Notification_Email']),
